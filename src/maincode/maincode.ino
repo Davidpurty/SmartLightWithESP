@@ -4,6 +4,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#include "batteryManager.h"
+
+BatteryManager battery;
 
 // ===== WiFi Credentials =====
 const char* ssid = "Lakshmi Luxury pg 3rd sub";
