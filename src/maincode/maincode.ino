@@ -14,12 +14,11 @@
 #include <Adafruit_SSD1306.h>
 #include "webPage.h"
 #include "batteryManager.h"
-
 BatteryManager battery;
 #include "lightingManager.h"
-
 LightingManager lighting;
-
+#include "gpioManager.h"
+pinManager pins;
 // ===== WiFi Credentials =====
 const char* ssid = "Lakshmi Luxury pg 3rd sub";
 const char* password = "9705560260@03";
@@ -162,7 +161,7 @@ void setup() {
   server.begin();
   Serial.println("Web Server Started");
   server.on("/state", handleState);
-
+  pins.pinInit();
 }
 
 void loop() {

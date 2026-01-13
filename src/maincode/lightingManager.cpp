@@ -1,4 +1,6 @@
 #include "lightingManager.h"
+#include "gpioManager.h"
+pinManager LEDpins;
 
 void LightingManager::begin() {
   for (uint8_t i = 0; i < MAX_ROOMS; i++) {
@@ -82,6 +84,6 @@ void LightingManager::applyLight(uint8_t roomId) {
   // === HARDWARE CONTROL GOES HERE ===
   // Example:
   // PWM output, relay, PCA9685, etc.
-  //
+  LEDpins.setPinState();
   // pwm.setPWM(roomId, 0, map(_brightness[roomId], 0, 100, 0, 4095));
 }

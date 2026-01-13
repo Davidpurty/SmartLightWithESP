@@ -1,9 +1,11 @@
 #include "batteryManager.h"
-
+#include "gpioManager.h"
+pinManager BMSpins;
 void BatteryManager::begin() {
   _batteryPercent = 0;
   _isCharging = false;
   _protectionEnabled = false;
+  BMSpins.pinInit();
 }
 
 int BatteryManager::readBatteryADC() {
