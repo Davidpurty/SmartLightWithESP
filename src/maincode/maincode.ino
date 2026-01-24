@@ -12,6 +12,8 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
+
 #include "webPage.h"
 #include "batteryManager.h"
 BatteryManager battery;
@@ -19,8 +21,17 @@ BatteryManager battery;
 LightingManager lighting;
 #include "gpioManager.h"
 pinManager pins;
+
+//add RTC library
+#include "I2C_RTC.h"
+static DS1307 RTC;
+
+//PCF9685 library
+#include "servoDriver.h"
+
+servoDriver pwm = servoDriver(0x40);
 // ===== WiFi Credentials =====
-const char* ssid = "Lakshmi Luxury pg 3rd sub";
+const char* ssid = "Lakshmi Luxury pg 3rd sub"; //Lakshmi Luxury pg 3rd floor-5G
 const char* password = "9705560260@03";
 
 // ===== Web Server =====
@@ -115,6 +126,17 @@ void handleState() {
 
   server.send(200, "application/json", json);
 }
+void updateRTC(){
+  if(RTC.isRunning())
+	{
+    Serial.print(RTC.getWeekString().substring(0, 3));
+    Serial.print(" ");
+    Serial.print(RTC.getDateString());
+    Serial.print(" ");
+    Serial.print(RTC.getTimeString());
+    Serial.println();
+    }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -152,6 +174,24 @@ void setup() {
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
   delay(5000);
+  //RTC setup
+  RTC.begin();
+  RTC.setHourMode(CLOCK_H12);
+  RTC.setDay(22);
+  RTC.setMonth(5);
+  RTC.setYear(2020);
+
+  RTC.setHours(23);
+  RTC.setMinutes(47);
+  RTC.setSeconds(56);
+
+  RTC.updateWeek();
+  //RTC setup done
+
+   // Start PCA9685
+  pwm.begin();
+  pwm.setPWMFreq(1000);   // 1K Hz for Led's
+  delay(10);
 
 
   // Routes
