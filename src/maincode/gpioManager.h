@@ -3,8 +3,9 @@
 #include <Arduino.h>
 class pinManager{
   public:
-  void pinInit();
-  void setPinState();
+  void pinInit(int maxRooms);
+  void setPinState(int, bool);
+  void setPinState(int, int);
   int getPinState();
 
 };

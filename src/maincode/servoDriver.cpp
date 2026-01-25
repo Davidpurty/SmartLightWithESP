@@ -29,7 +29,7 @@
 
 #include "servoDriver.h"
 
-#define ENABLE_DEBUG_OUTPUT 1
+//#define ENABLE_DEBUG_OUTPUT 1
 
 /*!
  *  @brief  Instantiates a new PCA9685 PWM driver chip with the I2C address on a

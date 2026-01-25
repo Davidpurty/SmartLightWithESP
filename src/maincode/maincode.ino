@@ -19,17 +19,13 @@
 BatteryManager battery;
 #include "lightingManager.h"
 LightingManager lighting;
-#include "gpioManager.h"
-pinManager pins;
+
 
 //add RTC library
 #include "I2C_RTC.h"
 static DS1307 RTC;
 
-//PCF9685 library
-#include "servoDriver.h"
 
-servoDriver pwm = servoDriver(0x40);
 // ===== WiFi Credentials =====
 const char* ssid = "Lakshmi Luxury pg 3rd sub"; //Lakshmi Luxury pg 3rd floor-5G
 const char* password = "9705560260@03";
@@ -59,6 +55,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 // ===== Variables =====
 int sliderVal[4] = {0,0,0,0};
 int switchVal[4] = {0,0,0,0};
+int prevSliderVal[4] = {0,0,0,0};
+int prevSwitchVal[4] = {0,0,0,0};
 
 // ===== Routes =====
 void handleRoot() {
@@ -74,7 +72,7 @@ void handleSet() {
     String key = "w" + String(i+1);
     if (server.hasArg(key)) switchVal[i] = server.arg(key).toInt();
   }
-
+  Serial.println("Printing all the data");
   Serial.println("\n===== WEB DATA =====");
   for (int i = 0; i < 4; i++)
     Serial.printf("Slider %d = %d\n", i+1, sliderVal[i]);
@@ -83,33 +81,34 @@ void handleSet() {
   Serial.println("==================\n");
 
   server.send(200, "text/plain", "OK");
+  updateLED();
+  updatedisplay();
 }
 void updatedisplay(){
   display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("SW1:");
+  display.print(switchVal[0]);
+  display.setCursor(36, 0);
+  display.print("slider:");
+  display.print(sliderVal[0]);
 
-display.setCursor(0, 0);
-display.print("SW1:");
-display.print(switchVal[0]);
-display.setCursor(36, 0);
-display.print("slider:");
-display.print(sliderVal[0]);
 
+  display.setCursor(0, 10);
+  display.print("SW2:");
+  display.print(switchVal[1]);
+  display.setCursor(36, 10);
+  display.print("slider:");
+  display.print(sliderVal[1]);
 
-display.setCursor(0, 10);
-display.print("SW2:");
-display.print(switchVal[1]);
-display.setCursor(36, 10);
-display.print("slider:");
-display.print(sliderVal[1]);
+  display.setCursor(0, 20);
+  display.print("SW3:");
+  display.print(switchVal[2]);
+  display.setCursor(36, 20);
+  display.print("slider:");
+  display.print(sliderVal[2]);
 
-display.setCursor(0, 20);
-display.print("SW3:");
-display.print(switchVal[2]);
-display.setCursor(36, 20);
-display.print("slider:");
-display.print(sliderVal[2]);
-
-display.display();
+  display.display();
 
 }
 void handleState() {
@@ -137,10 +136,42 @@ void updateRTC(){
     Serial.println();
     }
 }
-
+void updateLED(){
+  for(int i=0;i<4;i++){
+    if(switchVal[i]!= prevSwitchVal[i]){
+      int flag=switchVal[i];
+      if(flag){
+        lighting.turnOnLight(i);
+     }
+      else{
+        lighting.turnOffLight(i);
+     }
+    }
+    else if(prevSliderVal[i] != sliderVal[i]){
+      lighting.setBrightness(i, sliderVal[i]);
+    }
+    //update current value
+    prevSliderVal[i] = sliderVal[i];
+    prevSwitchVal[i] =switchVal[i];
+  }
+  
+}
 void setup() {
   Serial.begin(115200);
+  //static IP configuration
 
+  IPAddress local_IP(192, 168, 0, 11);   // same subnet as router
+  IPAddress gateway(192, 168, 0, 1);     // router IP
+  IPAddress subnet(255, 255, 255, 0);
+  IPAddress primaryDNS(8, 8, 8, 8);
+  IPAddress secondaryDNS(103, 6, 156, 199);
+
+  WiFi.disconnect(true);
+  delay(1000);
+  WiFi.mode(WIFI_STA);
+
+  WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS);
+  delay(100);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Wire.begin(I2C_SDA, I2C_SCL); // SDA, SCL
@@ -188,11 +219,8 @@ void setup() {
   RTC.updateWeek();
   //RTC setup done
 
-   // Start PCA9685
-  pwm.begin();
-  pwm.setPWMFreq(1000);   // 1K Hz for Led's
-  delay(10);
-
+  //start lightning
+  lighting.begin();
 
   // Routes
   server.on("/", handleRoot);
@@ -201,10 +229,9 @@ void setup() {
   server.begin();
   Serial.println("Web Server Started");
   server.on("/state", handleState);
-  pins.pinInit();
+  
 }
 
 void loop() {
   server.handleClient();
-  updatedisplay();
 }

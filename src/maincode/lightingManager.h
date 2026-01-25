@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#define MAX_ROOMS 16   // adjust as needed
+#define MAX_ROOMS 8   // adjust as needed
 
 class LightingManager {
 public:

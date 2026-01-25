@@ -9,15 +9,16 @@ void LightingManager::begin() {
     _timerActive[i] = false;
     _offTimestamp[i] = 0;
   }
+  LEDpins.pinInit(MAX_ROOMS);
 }
 
 void LightingManager::turnOnLight(uint8_t roomId) {
   if (roomId >= MAX_ROOMS) return;
 
   _lightState[roomId] = true;
-  if (_brightness[roomId] == 0) _brightness[roomId] = 100;
-
-  applyLight(roomId);
+  //if (_brightness[roomId] == 0) _brightness[roomId] = 100;
+  LEDpins.setPinState(roomId,_lightState[roomId]);
+  //applyLight(roomId);
 }
 
 void LightingManager::turnOffLight(uint8_t roomId) {
@@ -26,8 +27,8 @@ void LightingManager::turnOffLight(uint8_t roomId) {
   _lightState[roomId] = false;
   _brightness[roomId] = 0;
   _timerActive[roomId] = false;
-
-  applyLight(roomId);
+  LEDpins.setPinState(roomId,_lightState[roomId]);
+  //applyLight(roomId);
 }
 
 void LightingManager::turnOffAllLight() {
@@ -39,11 +40,11 @@ void LightingManager::turnOffAllLight() {
 void LightingManager::setBrightness(uint8_t roomId, uint8_t level) {
   if (roomId >= MAX_ROOMS) return;
 
-  level = constrain(level, 0, 100);
+  level = constrain(level, 0, 255);
   _brightness[roomId] = level;
   _lightState[roomId] = (level > 0);
-
-  applyLight(roomId);
+  LEDpins.setPinState(roomId,_brightness[roomId]);
+  //applyLight(roomId);
 }
 
 void LightingManager::setLightingTimer(uint8_t roomId, unsigned long timestamp) {
@@ -84,6 +85,7 @@ void LightingManager::applyLight(uint8_t roomId) {
   // === HARDWARE CONTROL GOES HERE ===
   // Example:
   // PWM output, relay, PCA9685, etc.
-  LEDpins.setPinState();
+  //LEDpins.setPinState(roomId,_lightState[roomId],_brightness[roomId]);
+  
   // pwm.setPWM(roomId, 0, map(_brightness[roomId], 0, 100, 0, 4095));
 }
