@@ -6,7 +6,7 @@ void BatteryManager::begin() {
   _protectionEnabled = false;
   //BMSpins.pinInit();
 }
-
+//we will work on battery management right now
 int BatteryManager::readBatteryADC() {
   // Example: ESP8266 ADC read
   return analogRead(A0);
